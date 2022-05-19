@@ -7,7 +7,6 @@ import {
   Text,
   View,
   Alert,
-  Button,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -37,9 +36,6 @@ export default function HomeScreen() {
   };
 
   const handleBet = () => {
-    // validate selected numbers and the stake
-    //if its valid display a success message
-
     // select winning numbers
     const winningNumbers = generateRandomNumber(20);
 
@@ -48,7 +44,10 @@ export default function HomeScreen() {
       selectedNumbers.includes(item)
     );
 
+    // set results
     setResults({ winningNumbers, matchingNumbers });
+
+    // show results
     showResult();
   };
 
@@ -70,8 +69,8 @@ export default function HomeScreen() {
 
   const clearState = () => {
     setSelectedNumbers([]), setStake("");
-    console.log("state cleared");
   };
+
   const generateRandomNumber = (size: number) => {
     const randomNumbers = [];
     while (randomNumbers.length < size) {
@@ -168,7 +167,7 @@ export default function HomeScreen() {
               <Text style={styles.btnText}>Place Bet</Text>
             </TouchableOpacity>
           </View>
-          {/* alternative results section12
+          {/* alternative results section
           {results.winningNumbers.length > 0 && (
             <View style={styles.results}>
               <Text style={styles.resultsTitle}>
