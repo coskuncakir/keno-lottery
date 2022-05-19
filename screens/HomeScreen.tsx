@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Text,
   View,
+  Alert,
+  Button,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -16,7 +18,11 @@ export default function HomeScreen() {
   const [selectedNumbers, setSelectedNumbers] = useState(
     selectedNumbersInitialState
   );
-  const [stake, setStake] = useState("500");
+  const [stake, setStake] = useState("");
+  const [results, setResults] = useState({
+    winningNumbers: [],
+    matchingNumbers: [],
+  });
 
   const handleSelectedNumber = (number: number) => {
     setSelectedNumbers((prevState) => {
@@ -33,18 +39,46 @@ export default function HomeScreen() {
   const handleBet = () => {
     // validate selected numbers and the stake
     //if its valid display a success message
+
+    // select winning numbers
+    const winningNumbers = generateRandomNumber(20);
+
+    // find matching numbers
+    const matchingNumbers = winningNumbers.filter((item) =>
+      selectedNumbers.includes(item)
+    );
+
+    setResults({ winningNumbers, matchingNumbers });
+    showResult();
   };
 
   const handleLuckyPick = () => {
-    // select 5 random numbers
-    const luckyNumbers = [];
-
-    while (luckyNumbers.length < 5) {
-      const random = Math.floor(Math.random() * 80) + 1;
-      if (luckyNumbers.indexOf(random) === -1) luckyNumbers.push(random);
-    }
-
+    const luckyNumbers = generateRandomNumber(5);
     setSelectedNumbers(luckyNumbers);
+  };
+
+  const showResult = () =>
+    Alert.alert(
+      "Results",
+      `Winning Numbers: ${results.winningNumbers} \n\n Matching Numbers: ${
+        results.matchingNumbers.length > 0
+          ? results.matchingNumbers
+          : "No Matching Number"
+      }`,
+      [{ text: "Play Again", onPress: () => clearState() }]
+    );
+
+  const clearState = () => {
+    setSelectedNumbers([]), setStake("");
+    console.log("state cleared");
+  };
+  const generateRandomNumber = (size: number) => {
+    const randomNumbers = [];
+    while (randomNumbers.length < size) {
+      const random = Math.floor(Math.random() * 80) + 1;
+      if (randomNumbers.indexOf(random) === -1) randomNumbers.push(random);
+    }
+    return randomNumbers;
   };
 
   return (
@@ -77,8 +111,9 @@ export default function HomeScreen() {
                       <Text style={styles.numberText}>{item}</Text>
                     </TouchableOpacity>
                   ))
-                : selectedPlaceholderNums.map((item) => (
+                : selectedPlaceholderNums.map((item, index) => (
                     <Text
+                      key={index}
                       style={[
                         styles.selectedNumber,
                         styles.selectedPlaceholderNumber,
@@ -117,11 +152,46 @@ export default function HomeScreen() {
               value={stake}
               onChangeText={setStake}
               keyboardType="numeric"
+              style={styles.textInput}
+              placeholder="Enter Stake"
             />
-            <TouchableOpacity style={[styles.btn]} onPress={handleBet}>
+            <TouchableOpacity
+              disabled={selectedNumbers.length < 5 || !stake}
+              style={[
+                styles.btn,
+                selectedNumbers.length < 5 || !stake
+                  ? styles.btnDisabled
+                  : null,
+              ]}
+              onPress={handleBet}
+            >
               <Text style={styles.btnText}>Place Bet</Text>
             </TouchableOpacity>
           </View>
+          {/* alternative results section12
+          {results.winningNumbers.length > 0 && (
+            <View style={styles.results}>
+              <Text style={styles.resultsTitle}>
+                Winning Numbers | {results.matchingNumbers.length} matching
+                number
+              </Text>
+              <View style={styles.resultNumbers}>
+                {results.winningNumbers.map((item) => (
+                  <Text
+                    style={[
+                      styles.resultNumber,
+                      results.matchingNumbers.includes(item) &&
+                        styles.matchingNumber,
+                    ]}
+                    key={item}
+                  >
+                    {item}
+                  </Text>
+                ))}
+              </View>
+            </View>
+          )}
+          */}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -216,7 +286,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0,
   },
   footer: {
-    flex: 1,
+    marginTop: 24,
+    display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -229,9 +300,58 @@ const styles = StyleSheet.create({
     backgroundColor: "#443bc8",
     borderRadius: 4,
   },
+  btnDisabled: {
+    backgroundColor: "#d3d3d3",
+  },
   btnText: {
     color: "white",
     fontSize: 20,
     fontWeight: "bold",
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: "#443bc8",
+    padding: 12,
+    minWidth: 150,
+    borderRadius: 4,
+  },
+  results: {
+    marginTop: 24,
+    paddingLeft: 4,
+    paddingRight: 4,
+    paddingTop: 8,
+    paddingBottom: 8,
+    display: "flex",
+    flexDirection: "column",
+    backgroundColor: "#3f34b6",
+    borderRadius: 4,
+  },
+  resultsTitle: {
+    fontSize: 16,
+    color: "#9a95e7",
+    fontWeight: "bold",
+    marginBottom: 8,
+    marginLeft: 8,
+  },
+  resultNumbers: {
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  resultNumber: {
+    minWidth: 24,
+    padding: 4,
+    backgroundColor: "#645cbf",
+    color: "white",
+    margin: 4,
+    borderRadius: 12,
+    overflow: "hidden",
+    textAlign: "center",
+    fontSize: 12,
+  },
+  matchingNumber: {
+    backgroundColor: "red",
   },
 });
