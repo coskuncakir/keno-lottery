@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -12,16 +12,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const numbers = Array.from(Array(80), (_, index) => index + 1);
-  const selectedNumbersInitialState: any[] = [];
   const selectedPlaceholderNums: any[] = ["?", "?", "?", "?", "?"];
-  const [selectedNumbers, setSelectedNumbers] = useState(
-    selectedNumbersInitialState
-  );
-  const [stake, setStake] = useState("");
-  const [results, setResults] = useState({
-    winningNumbers: [],
-    matchingNumbers: [],
-  });
+  const [selectedNumbers, setSelectedNumbers] = React.useState<number[]>([]);
+  const [stake, setStake] = React.useState("");
 
   const handleSelectedNumber = (number: number) => {
     setSelectedNumbers((prevState) => {
@@ -35,40 +28,36 @@ export default function HomeScreen() {
     });
   };
 
-  const handleBet = () => {
-    // select winning numbers
-    const winningNumbers = generateRandomNumber(20);
-
-    // find matching numbers
-    const matchingNumbers = winningNumbers.filter((item) =>
-      selectedNumbers.includes(item)
-    );
-
-    // set results
-    setResults({ winningNumbers, matchingNumbers });
-
-    // show results
-    showResult();
-  };
-
   const handleLuckyPick = () => {
     const luckyNumbers = generateRandomNumber(5);
     setSelectedNumbers(luckyNumbers);
   };
 
-  const showResult = () =>
-    Alert.alert(
-      "Results",
-      `Winning Numbers: ${results.winningNumbers} \n\n Matching Numbers: ${
-        results.matchingNumbers.length > 0
-          ? results.matchingNumbers
-          : "No Matching Number"
-      }`,
-      [{ text: "Play Again", onPress: () => clearState() }]
+  const handlePlaceBetEvent = () => {
+    // select winning 20 numbers
+    const winningNumbers = generateRandomNumber(20);
+
+    // find matching numbers between winning numbers
+    const matchingNumbers = winningNumbers.filter((item) =>
+      selectedNumbers.includes(item)
     );
 
+    // show results
+    Alert.alert(
+      "Results",
+      `Winning Numbers: ${winningNumbers} \n
+       Selected Numbers: ${selectedNumbers} \n
+       Matching Numbers: ${
+         matchingNumbers.length > 0 ? matchingNumbers : "No Matching Number"
+       }\n
+       Possible winning: £${matchingNumbers.length * +stake}`,
+      [{ text: "Ok", onPress: () => clearState() }]
+    );
+  };
+
   const clearState = () => {
-    setSelectedNumbers([]), setStake("");
+    setSelectedNumbers([]);
+    setStake("");
   };
 
   const generateRandomNumber = (size: number) => {
@@ -98,7 +87,7 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.selectedNumbersContainer}>
-            <Text style={styles.secondaryTitle}>Selected Numbers</Text>
+            <Text style={styles.selectedNumbersTitle}>Selected Numbers</Text>
             <View style={[styles.grid, styles.selectedNumbers]}>
               {selectedNumbers.length
                 ? selectedNumbers.map((item) => (
@@ -162,35 +151,11 @@ export default function HomeScreen() {
                   ? styles.btnDisabled
                   : null,
               ]}
-              onPress={handleBet}
+              onPress={handlePlaceBetEvent}
             >
               <Text style={styles.btnText}>Place Bet</Text>
             </TouchableOpacity>
           </View>
-          {/* alternative results section
-          {results.winningNumbers.length > 0 && (
-            <View style={styles.results}>
-              <Text style={styles.resultsTitle}>
-                Winning Numbers | {results.matchingNumbers.length} matching
-                number
-              </Text>
-              <View style={styles.resultNumbers}>
-                {results.winningNumbers.map((item) => (
-                  <Text
-                    style={[
-                      styles.resultNumber,
-                      results.matchingNumbers.includes(item) &&
-                        styles.matchingNumber,
-                    ]}
-                    key={item}
-                  >
-                    {item}
-                  </Text>
-                ))}
-              </View>
-            </View>
-          )}
-          */}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -255,7 +220,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#443bc8",
     justifyContent: "center",
   },
-  secondaryTitle: {
+  selectedNumbersTitle: {
     fontSize: 20,
     color: "#9a95e7",
     fontWeight: "bold",
@@ -313,44 +278,5 @@ const styles = StyleSheet.create({
     padding: 12,
     minWidth: 150,
     borderRadius: 4,
-  },
-  results: {
-    marginTop: 24,
-    paddingLeft: 4,
-    paddingRight: 4,
-    paddingTop: 8,
-    paddingBottom: 8,
-    display: "flex",
-    flexDirection: "column",
-    backgroundColor: "#3f34b6",
-    borderRadius: 4,
-  },
-  resultsTitle: {
-    fontSize: 16,
-    color: "#9a95e7",
-    fontWeight: "bold",
-    marginBottom: 8,
-    marginLeft: 8,
-  },
-  resultNumbers: {
-    display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  resultNumber: {
-    minWidth: 24,
-    padding: 4,
-    backgroundColor: "#645cbf",
-    color: "white",
-    margin: 4,
-    borderRadius: 12,
-    overflow: "hidden",
-    textAlign: "center",
-    fontSize: 12,
-  },
-  matchingNumber: {
-    backgroundColor: "red",
   },
 });
